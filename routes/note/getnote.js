@@ -24,7 +24,7 @@ const connection = async () => {
 };
 const getdata = async (req, res, next) => {
   try {
-    const collection = client.db(documents).collection(data);
+    const collection = client.db("noteapp").collection("note-data");
     const result = await collection.find().toArray();
     req.blogdata = result;
     next();
