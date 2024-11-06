@@ -3,8 +3,6 @@ const getnote = express.Router();
 import "dotenv/config";
 import { MongoClient, ServerApiVersion } from "mongodb";
 const uri = process.env.MONGOURL;
-const data = process.env.NOTEDATA
-const documents = process.env.DOCUMENTS
 
 const client = new MongoClient(uri, {
   serverApi: {

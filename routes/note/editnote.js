@@ -25,13 +25,13 @@ connection();
 
 editnote.put("/note", async (req, res) => {
   const { target, title, value } = req.body;
-//   if (target && title && value) {
-    await client
+  const updated =  await client
       .db("noteapp")
       .collection("note-data")
       .updateOne({ _id: new ObjectId(target) }, { $set:{agenda: title, blog: value} });
-    res.status(201).json({ data: req.body, status: 201, massage: "success" });
-//   }
+    if( await updated.modifiedCount == 1){
+    res.status(201).json({ data: req.body, status: 201, massage: "success",changes:updated.modifiedCount });}
+    else{res.status(417).json({massage:"no data was found",changes:updated.modifiedCount})}
 });
 
 export default editnote
