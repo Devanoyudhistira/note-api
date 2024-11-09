@@ -29,7 +29,7 @@ loginuser.post("/login", async (req, res) => {
     const loginuser = await client.db(database).collection(userdb);
     const searchresult = await loginuser.find({ username: username }).toArray();
     if (searchresult.length === 0) {
-      userconnect.insertOne({username:username,nickname:nickname});
+      loginuser.insertOne({username:username,nickname:nickname});
       res.status(204).json({ massage: "add new user", status: 202 ,data:req.body});
     } else {
       res
