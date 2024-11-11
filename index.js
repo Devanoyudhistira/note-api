@@ -6,7 +6,6 @@ import createnote from "./routes/note/createnote.js"
 import editnote from "./routes/note/editnote.js"
 import cors from "cors";
 import loginuser from "./routes/auth/login.js"
-
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 
