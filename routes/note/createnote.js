@@ -24,6 +24,7 @@ connection();
 
 const postnote = async (req, res, next) => {
   const collection = client.db("noteapp").collection("note-data");
+  req.body.sender = req.session.name
   await collection.insertOne(req.body);
   next();
 };
@@ -31,7 +32,6 @@ const postnote = async (req, res, next) => {
 createnote.use(postnote);
 
 createnote.post("/note", (req, res) => {
-  const { notetitle, notedate, notevalue } = req.body;
   res.json(req.body);
 });
 
