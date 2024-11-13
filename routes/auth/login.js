@@ -46,7 +46,7 @@ loginuser.post("/login", async (req, res) => {
     if (searchresult.length === 0) {
       const createuser = await loginuserCollection.insertOne({ username, nickname });
       req.session.nama = (await createuser).insertedId;
-      res.status(200).json({ message: "User added", status: 202, user: req.session.nama, data: req.body });
+      res.status(200).json({ message: "User added", status: 202, user: req.session.nama.nama, data: req.body });
     } else {
       const userid = searchresult[0]["_id"];
       req.session.nama = { name: userid };
