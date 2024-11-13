@@ -7,7 +7,7 @@ import editnote from "./routes/note/editnote.js"
 import cors from "cors";
 import loginuser from "./routes/auth/login.js"
 import deletenote from "./routes/note/deletenote.js"
-app.use(cors({ origin: "*" ,credentials:true}));
+app.use(cors({ origin: ["http://localhost:5173","https://devanote.vercel.app/"] ,credentials:true}));
 app.use(express.json());
 
 app.use("/getnote",getnote)

@@ -3,6 +3,18 @@ const createnote = express.Router();
 import "dotenv/config";
 import { MongoClient, ServerApiVersion } from "mongodb";
 const uri = process.env.MONGOURL;
+import cookieSession from "cookie-session";
+import cookieParser from "cookie-parser";
+createnote.use(express.urlencoded({ extended: true }));
+createnote.use(cookieParser());
+createnote.use(cookieSession({
+  name: 'session',
+  keys: ['devano'],
+  maxAge: 24 * 60 * 60 * 1000,
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax'
+}));
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -24,7 +36,6 @@ connection();
 
 const postnote = async (req, res, next) => {
   const collection = client.db("noteapp").collection("note-data");
-  req.body.sender = req.session.name
   await collection.insertOne(req.body);
   next();
 };

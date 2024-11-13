@@ -2,21 +2,22 @@ import express from "express";
 const loginuser = express.Router();
 import "dotenv/config";
 import { MongoClient, ServerApiVersion } from "mongodb";
+import cookieSession from "cookie-session";
+import cookieParser from "cookie-parser";
+
 const uri = process.env.MONGOURL;
 const database = "noteapp";
 const userdb = "usernote";
-import cookieSession from "cookie-session";  
 
 loginuser.use(express.urlencoded({ extended: true }));
+loginuser.use(cookieParser());
 loginuser.use(cookieSession({
-  secret: 'devano', 
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-    httpOnly: true,
-    secure: false, 
-    sameSite: 'lax'
-  }
+  name: 'session',
+  keys: ['devano'],
+  maxAge: 24 * 60 * 60 * 1000,
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax'
 }));
 
 const client = new MongoClient(uri, {
@@ -32,30 +33,28 @@ const connection = async () => {
     await client.connect();
     await client.db().command({ ping: 1 });
   } catch (error) {
-    console.log(error + "failed");
+    console.log(error + " failed");
   }
 };
 
 loginuser.post("/login", async (req, res) => {
-  const { username ,nickname} = req.body;
+  const { username, nickname } = req.body;
   if (username) {
-    const loginuser = await client.db(database).collection(userdb);
-    const searchresult = await loginuser.find({ username: username }).toArray();
+    const loginuserCollection = await client.db(database).collection(userdb);
+    const searchresult = await loginuserCollection.find({ username }).toArray();
+
     if (searchresult.length === 0) {
-      const createuser = loginuser.insertOne({username:username,nickname:nickname,});
-      req.session.nama = (await createuser).insertedId
-      res.status(200).json({ massage: "add new user", status: 202,user:req.session.nama ,data:req.body});
+      const createuser = await loginuserCollection.insertOne({ username, nickname });
+      req.session.nama = (await createuser).insertedId;
+      res.status(200).json({ message: "User added", status: 202, user: req.session.nama, data: req.body });
     } else {
-      const userid = searchresult[0]["_id"]
-      req.session.nama = userid
-      res
-        .status(202)
-        .json({ massage: "login success",user22: req.session.nama ,status: 200,data:req.body });
+      const userid = searchresult[0]["_id"];
+      req.session.nama = { name: userid };
+      res.status(202).json({ message: "Login success", user: req.session.nama, status: 200, data: req.body });
     }
   } else {
-    res.status(408).json({ massage: "bad request", status: 408 });
+    res.status(408).json({ message: "Bad request", status: 408 });
   }
 });
-
 
 export default loginuser;

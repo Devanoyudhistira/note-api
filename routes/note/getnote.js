@@ -20,18 +20,11 @@ const connection = async () => {
     console.log(error + "failed");
   }
 };
-const getdata = async (req, res, next) => {
-  try {
-    const collection = client.db("noteapp").collection("note-data");
-    const result = await collection.find().toArray();
-    req.blogdata = result;
-    next();
-  } catch (error) {
-    console.log(error);
-  }
-};
-getnote.use(getdata);
-getnote.get("/", (req, res) => {
+getnote.get("/:user",async (req, res) => {
+  const {user} = req.params
+  const collection = client.db("noteapp").collection("note-data");
+  const result = await collection.find(({"sender":user})).toArray();
+  req.blogdata = result;
   const passkey = req.get("passkey");
   if (passkey === "devano yudhistira jago banget bjir") {
     res.status(200).json(req.blogdata);
