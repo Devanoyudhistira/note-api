@@ -11,10 +11,29 @@ import updatenote from "./routes/note/updatenote.js";
 import updateproject from "./routes/note/updateproject.js";
 import updatetodolist from "./routes/note/updatetodo.js";
 app.use(express.json());
-app.use(cors({ origin: "*" }));
-res.setHeader("Access-Control-Allow-Origin", "*");
-res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://devanote.vercel.app/"
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl, httpie)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true); // allow
+      } else {
+        callback(new Error("Not allowed by CORS")); // block
+      }
+    },
+    credentials: true,
+  })
+);
+
+
 
 if (req.method === "OPTIONS") {
   return res.status(200).end();
