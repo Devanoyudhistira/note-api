@@ -24,7 +24,7 @@ app.use("/updatetodolist",updatetodolist)
 app.use("/deletenote",deletenote)
 
 app.get("/",(req,res) => {
-    res.json({nama:"devano yudhistira 221 112"})
+    res.json({nama:"devano yudhistira"})
 })
 
 console.log();
