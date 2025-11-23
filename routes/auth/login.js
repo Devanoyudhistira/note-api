@@ -37,9 +37,9 @@ const connection = async () => {
   }
 };
 
-loginuser.post("/", async (req, res) => {
+loginuser.post("/login", async (req, res) => {
   const { username, nickname } = req.body;
-  if (username || nickname) {
+  if (username) {
     const loginuserCollection = await client.db(database).collection(userdb);
     const searchresult = await loginuserCollection.find({ username }).toArray();
 
@@ -52,7 +52,6 @@ loginuser.post("/", async (req, res) => {
       req.session.nama = { name: userid };
       res.status(202).json({ message: "Login success", user: req.session.nama, status: 200, data: req.body });
     }
-    
   } else {
     res.status(408).json({ message: "Bad request", status: 408 });
   }
