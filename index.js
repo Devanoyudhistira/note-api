@@ -17,7 +17,7 @@ app.use(express.json());
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://devanote.vercel.app"   // REMOVE TRAILING SLASH
+  "https://devanote.vercel.app" 
 ];
 
 app.use(
