@@ -11,14 +11,16 @@ const userdb = "usernote";
 
 loginuser.use(express.urlencoded({ extended: true }));
 loginuser.use(cookieParser());
-loginuser.use(cookieSession({
-  name: 'session',
-  keys: ['devano'],
-  maxAge: 24 * 60 * 60 * 1000,
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax'
-}));
+loginuser.use(
+  cookieSession({
+    name: "session",
+    keys: ["devano"],
+    maxAge: 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  })
+);
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -28,32 +30,52 @@ const client = new MongoClient(uri, {
   },
 });
 
-const connection = async () => {
-  try {
+async function connectDB() {
+  if (!client.topology || !client.topology.isConnected()) {
     await client.connect();
-    await client.db().command({ ping: 1 });
-  } catch (error) {
-    console.log(error + " failed");
   }
-};
+}
 
 loginuser.post("/login", async (req, res) => {
-  const { username, nickname } = req.body;
-  if (username) {
-    const loginuserCollection = await client.db(database).collection(userdb);
-    const searchresult = await loginuserCollection.find({ username }).toArray();
+  try {
+    const { username, nickname } = req.body;
 
-    if (searchresult.length === 0) {
-      const createuser = await loginuserCollection.insertOne({ username, nickname });
-      req.session.nama = (await createuser).insertedId;
-      res.status(200).json({ message: "User added", status: 202, user: req.session.nama.nama, data: req.body });
-    } else {
-      const userid = searchresult[0]["_id"];
-      req.session.nama = { name: userid };
-      res.status(202).json({ message: "Login success", user: req.session.nama, status: 200, data: req.body });
+    if (!username) {
+      return res.status(400).json({ message: "Bad request", status: 400 });
     }
-  } else {
-    res.status(408).json({ message: "Bad request", status: 408 });
+
+    await connectDB(); // IMPORTANT!!
+
+    const loginuserCollection = client.db(database).collection(userdb);
+    const user = await loginuserCollection.findOne({ username });
+
+    if (!user) {
+      // Create new user
+      const create = await loginuserCollection.insertOne({
+        username,
+        nickname,
+      });
+
+      req.session.user = { id: create.insertedId };
+
+      return res.status(201).json({
+        message: "User added",
+        user: req.session.user,
+        data: req.body,
+      });
+    }
+
+    // Existing user
+    req.session.user = { id: user._id };
+
+    return res.status(200).json({
+      message: "Login success",
+      user: req.session.user,
+      data: req.body,
+    });
+  } catch (err) {
+    console.log("Login route error:", err);
+    return res.status(500).json({ message: "Server error", error: err });
   }
 });
 
